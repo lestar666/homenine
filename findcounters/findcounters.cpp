@@ -17,9 +17,8 @@ int main()
 
 	float num[100];
 
-	cv::Mat inversedMat = 255 - srcMat;
-	threshold(inversedMat, binaryMat, 150, 255, THRESH_OTSU);
-	Mat element = getStructuringElement(MORPH_RECT, Size(13, 13));
+	threshold(srcMat, binaryMat, 150, 255, THRESH_OTSU);
+	Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
 	morphologyEx(binaryMat, binaryMat, MORPH_OPEN, element);
 
 	//获得连通域
@@ -35,7 +34,7 @@ int main()
 		float Y = sqrt((vtx[0].y - vtx[1].y) * (vtx[0].y - vtx[1].y) + (vtx[0].x - vtx[1].x) * (vtx[0].x - vtx[1].x));
 		float X = sqrt((vtx[1].y - vtx[2].y) * (vtx[1].y - vtx[2].y) + (vtx[1].x - vtx[2].x) * (vtx[1].x - vtx[2].x));
 		num[i] = X / Y;
-		if ((num[i] >= 0.9) and (num[i] <= 1.0))
+		if ((num[i] >= 0.95) and (num[i] <= 1.1))
 		{
 			for (int j = 0; j <= 3; j++)
 			{
