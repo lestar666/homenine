@@ -7,34 +7,43 @@ using namespace std;
 int main()
 {
 
-	cv::Mat srcMat;
-	cv::Mat dspMat;
-	cv::Mat binaryMat;
+	cv::Mat src;
+	cv::Mat dsp;
+	cv::Mat binary;
 
-	srcMat = imread("rim.png", 0);
-	dspMat = imread("rim.png");
+	src = imread("rim.png", 0);
+	dsp = imread("rim.png");
 
-	cv::Mat inversedMat = 255 - srcMat;
-	threshold(inversedMat, binaryMat, 150, 255, THRESH_OTSU);
+	float num[100];
+
+	cv::Mat inversedMat = 255 - src;
+	threshold(inversedMat, binary, 150, 255, THRESH_OTSU);
+	Mat element = getStructuringElement(MORPH_RECT, Size(13, 13));
+	morphologyEx(binary, binary, MORPH_OPEN, element);
+
 	//获得连通域
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
-	findContours(binaryMat, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+	findContours(binary, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+
 
 	for (int i = 0; i < contours.size(); i++)
 	{
 		RotatedRect rect = minAreaRect(contours[i]);
-
-		drawContours(dspMat, contours, i, Scalar(0, 0, 255), 1, 8);
-
-		Point2f center;
-		float radius;
-		minEnclosingCircle(contours[i], center, radius);
-		circle(dspMat, center, radius, Scalar(0,0,255), 2, CV_AA);
+		Point2f vtx[4];
+		rect.points(vtx);
+		float Y = sqrt((vtx[0].y - vtx[1].y) * (vtx[0].y - vtx[1].y) + (vtx[0].x - vtx[1].x) * (vtx[0].x - vtx[1].x));
+		float X = sqrt((vtx[1].y - vtx[2].y) * (vtx[1].y - vtx[2].y) + (vtx[1].x - vtx[2].x) * (vtx[1].x - vtx[2].x));
+		num[i] = X / Y;
+		if ((num[i] >= 0.95) and (num[i] <= 1.1))
+		{
+			for (int j = 0; j <= 3; j++)
+			{
+				line(dsp, vtx[j], vtx[(j + 1) % 4], Scalar(0,0,255), 1);
+			}
+		}
 	}
-
-	imshow("src", srcMat);
-	imshow("dis", dspMat);
+	imshow("dis", dsp);
 	waitKey(0);
 	return 0;
 }
